@@ -1,0 +1,17 @@
+{
+  "name": "ai-or-human-demo",
+  "version": "1.0.0",
+  "description": "AI or Human? - 单机演示版",
+  "main": "worker.js",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "tail": "wrangler tail"
+  },
+  "keywords": ["game", "ai", "turing-test"],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "wrangler": "^3.0.0"
+  }
+}

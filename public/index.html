@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI or Human? - 你能分辨吗？</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Arial', 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        h1 {
+            color: #333;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            color: #666;
+            font-size: 1.2em;
+        }
+        
+        /* 屏幕状态 */
+        .screen {
+            display: none;
+        }
+        
+        .screen.active {
+            display: block;
+        }
+        
+        /* 按钮样式 */
+        .btn {
+            padding: 15px 30px;
+            font-size: 1.1em;
+            font-weight: bold;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 10px;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-secondary {
+            background: linear-gradient(135deg, #4ecdc4 0%, #44a08d 100%);
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            transform: scale(1.05);
+        }
+        
+        .btn-danger {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
+            color: white;
+        }
+        
+        /* 倒计时 */
+        .timer {
+            text-align: center;
+            font-size: 3em;
+            font-weight: bold;
+            color: #667eea;
+            margin: 20px 0;
+        }
+        
+        .timer.warning {
+            color: #ff6b6b;
+            animation: pulse 1s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        /* 问题卡片 */
+        .question-card {
+            background: #f8f9fa;
+            border-left: 5px solid #667eea;
+            padding: 25px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+        }
+        
+        .question-text {
+            font-size: 1.5em;
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+        
+        .question-hint {
+            color: #777;
+            font-size: 0.9em;
+        }
+        
+        /* 输入框 */
+        textarea {
+            width: 100%;
+            min-height: 150px;
+            padding: 15px;
+            font-size: 1.1em;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            resize: vertical;
+            font-family: inherit;
+            transition: border-color 0.3s ease;
+        }
+        
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        /* 回答卡片 */
+        .answer-card {
+            background: #f8f9fa;
+            border: 2px solid #e0e0e0;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+        }
+        
+        .answer-card:hover {
+            border-color: #667eea;
+            transform: translateY(-3px);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+        
+        .answer-card.selected {
+            border-color: #4ecdc4;
+            background: #e8f8f5;
+        }
+        
+        .answer-label {
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+        
+        .answer-content {
+            font-size: 1.1em;
+            line-height: 1.6;
+            color: #333;
+            white-space: pre-wrap;
+        }
+        
+        /* 玩家列表 */
+        .player-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .player-card {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+        }
+        
+        .player-name {
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .player-score {
+            color: #667eea;
+            font-size: 0.9em;
+        }
+        
+        /* 结果展示 */
+        .result-badge {
+            display: inline-block;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-weight: bold;
+            margin: 5px;
+        }
+        
+        .result-ai {
+            background: #ff6b6b;
+            color: white;
+        }
+        
+        .result-human {
+            background: #4ecdc4;
+            color: white;
+        }
+        
+        /* 进度条 */
+        .progress {
+            background: #e0e0e0;
+            border-radius: 10px;
+            height: 10px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        
+        .progress-bar {
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            height: 100%;
+            transition: width 0.3s ease;
+        }
+        
+        /* 按钮组 */
+        .button-group {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+        
+        /* 统计信息 */
+        .stats {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        .stat-item:last-child {
+            border-bottom: none;
+        }
+        
+        /* 响应式 */
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px;
+            }
+            
+            h1 {
+                font-size: 1.8em;
+            }
+            
+            .btn {
+                width: 100%;
+                margin: 5px 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🤖 AI or Human?</h1>
+            <p class="subtitle">你能分辨出哪个是 AI 写的吗？</p>
+        </header>
+        
+        <!-- 首页 -->
+        <div id="home-screen" class="screen active">
+            <div style="text-align: center; margin: 40px 0;">
+                <p style="font-size: 1.2em; color: #666; margin-bottom: 30px;">
+                    这是一个图灵测试游戏<br>
+                    你要假装自己是 AI 来回答问题<br>
+                    然后让其他玩家猜哪个是 AI 写的
+                </p>
+                
+                <div class="button-group">
+                    <button class="btn btn-primary" onclick="game.startDemo()">🎮 开始演示</button>
+                    <button class="btn btn-secondary" onclick="game.showHowToPlay()">❓ 如何玩</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 游戏说明 -->
+        <div id="howto-screen" class="screen">
+            <h2 style="margin-bottom: 20px;">📖 游戏规则</h2>
+            <div style="line-height: 1.8; color: #555;">
+                <p><strong>1️⃣ 看问题</strong> - 系统会显示一个问题或话题</p>
+                <p><strong>2️⃣ 写回答</strong> - 你在 60 秒内写下回答（要像 AI 一样）</p>
+                <p><strong>3️⃣ 看答案</strong> - 所有回答匿名展示（包括 AI 生成的）</p>
+                <p><strong>4️⃣ 投票</strong> - 猜哪个是 AI 写的</p>
+                <p><strong>5️⃣ 得分</strong> - 猜对得分，骗过别人也得分</p>
+            </div>
+            <div class="button-group">
+                <button class="btn btn-primary" onclick="game.showHome()">🏠 返回主页</button>
+                <button class="btn btn-secondary" onclick="game.startDemo()">🎮 开始游戏</button>
+            </div>
+        </div>
+        
+        <!-- 游戏进行中 -->
+        <div id="game-screen" class="screen">
+            <div class="progress">
+                <div id="round-progress" class="progress-bar" style="width: 33%"></div>
+            </div>
+            
+            <div class="question-card">
+                <div class="question-text" id="question-text">问题加载中...</div>
+                <div class="question-hint">请在 60 秒内写下你的回答，要尽量像 AI 一样</div>
+            </div>
+            
+            <div class="timer" id="timer">60</div>
+            
+            <textarea id="answer-input" placeholder="在这里输入你的回答..."></textarea>
+            
+            <div class="button-group">
+                <button class="btn btn-primary" onclick="game.submitAnswer()">✅ 提交回答</button>
+                <button class="btn btn-secondary" onclick="game.useAiHint()">💡 使用 AI 提示</button>
+            </div>
+        </div>
+        
+        <!-- 投票界面 -->
+        <div id="voting-screen" class="screen">
+            <h2 style="text-align: center; margin-bottom: 20px;">🗳️ 投票：哪个是 AI 写的？</h2>
+            <p style="text-align: center; color: #666; margin-bottom: 20px;">
+                点击你认为由 AI 生成的回答
+            </p>
+            
+            <div id="answers-container">
+                <!-- 答案卡片会动态插入 -->
+            </div>
+            
+            <div class="timer" id="voting-timer">15</div>
+        </div>
+        
+        <!-- 结果界面 -->
+        <div id="results-screen" class="screen">
+            <h2 style="text-align: center; margin-bottom: 20px;">📊 本轮结果</h2>
+            
+            <div style="text-align: center; margin: 30px 0;">
+                <div style="font-size: 2em; margin-bottom: 10px;">
+                    🤖 AI 回答是：<span id="ai-answer-label" style="color: #ff6b6b; font-weight: bold;">A</span>
+                </div>
+                
+                <div id="voting-stats" style="color: #666;">
+                    <!-- 投票统计 -->
+                </div>
+            </div>
+            
+            <div class="stats">
+                <h3 style="margin-bottom: 15px;">本轮得分</h3>
+                <div id="round-scores">
+                    <!-- 得分信息 -->
+                </div>
+            </div>
+            
+            <div class="stats">
+                <h3 style="margin-bottom: 15px;">当前排名</h3>
+                <div id="leaderboard">
+                    <!-- 排行榜 -->
+                </div>
+            </div>
+            
+            <div class="button-group">
+                <button class="btn btn-primary" id="next-round-btn" onclick="game.nextRound()">➡️ 下一轮</button>
+                <button class="btn btn-secondary" onclick="game.showHome()">🏠 返回主页</button>
+            </div>
+        </div>
+        
+        <!-- 游戏结束 -->
+        <div id="gameover-screen" class="screen">
+            <h2 style="text-align: center; margin-bottom: 30px;">🏆 游戏结束</h2>
+            
+            <div style="text-align: center; margin: 40px 0;">
+                <div style="font-size: 3em; margin-bottom: 20px;">🥇</div>
+                <div id="winner-name" style="font-size: 2em; color: #667eea; font-weight: bold;"></div>
+                <div id="winner-score" style="color: #666; margin-top: 10px;"></div>
+            </div>
+            
+            <div class="stats">
+                <h3 style="margin-bottom: 15px;">最终排名</h3>
+                <div id="final-leaderboard">
+                    <!-- 最终排名 -->
+                </div>
+            </div>
+            
+            <div class="button-group">
+                <button class="btn btn-primary" onclick="game.startDemo()">🔄 再来一局</button>
+                <button class="btn btn-secondary" onclick="game.showHome()">🏠 返回主页</button>
+            </div>
+        </div>
+    </div>
+    
+    <script src="game.js"></script>
+</body>
+</html>
