@@ -4,3 +4,8 @@ compatibility_date = "2024-01-01"
 
 [site]
 bucket = "./public"
+
+# Pages 构建配置
+[build]
+command = "echo 'No build needed'"
+publish = "public"
